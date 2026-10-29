@@ -1,0 +1,33 @@
+{
+  "name": "skim-profes",
+  "version": "0.1.0",
+  "description": "App del profesor de Skim Incoming (prototipo)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/camachochatbot/skim-profes.git"
+  },
+  "bugs": {
+    "url": "https://github.com/camachochatbot/skim-profes/issues"
+  },
+  "homepage": "https://github.com/camachochatbot/skim-profes#readme",
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.6",
+    "@types/node": "^26.6.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.7",
+    "vite-plugin-pwa": "^2.0.0"
+  },
+  "dependencies": {
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@preact/signals": "^2.11.4",
+    "idb": "^8.0.4",
+    "preact": "^11.1.0"
+  },
+  "private": true,
+  "type": "module"
+}

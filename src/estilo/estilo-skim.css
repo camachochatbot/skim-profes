@@ -1,0 +1,37 @@
+/* Estilo del cuadro de mandos SKIM — extraído de la web en vivo (solo lectura), 29-10-2026.
+   Fuente: Archivo (Google Fonts) → https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap */
+
+:root { /* tema claro */
+  --c-bg:#f2f4fa; --c-surface:#ffffff; --c-surface-2:#f7f8fc; --c-line:#e1e4f0;
+  --c-ink:#14163a; --c-ink-2:#4a4e76; --c-muted:#6e7398;
+  --c-navy:#292c77; --c-brand:#292c77; --c-ice:#e8ebfb;
+  --c-accent:#f2551d; --c-accent-ink:#c2410c;
+  --c-good:#0a7d32; --c-warn:#9a6200; --c-crit:#c62f2f;
+  --topo: url("curvas-nivel-claro.svg");
+}
+:root[data-theme="dark"] { /* tema oscuro (por defecto en el cuadro) */
+  --c-bg:#0a0c24; --c-surface:#161a3d; --c-surface-2:#1c2049; --c-line:#2a2f63;
+  --c-ink:#eef0ff; --c-ink-2:#b9bde6; --c-muted:#8d92c4;
+  --c-navy:#aeb3ff; --c-brand:#1d2063; --c-ice:#22265a;
+  --c-accent:#ff6a33; --c-accent-ink:#ff9a6e;
+  --c-good:#3ccf6e; --c-warn:#f2b33d; --c-crit:#ff6b6b;
+  --topo: url("curvas-nivel-oscuro.svg");
+}
+
+body { font-family: Archivo, ui-sans-serif, system-ui, sans-serif; background: var(--c-bg) var(--topo) 0 0 / 900px 900px repeat; color: var(--c-ink); }
+
+.cond { font-stretch: 70%; font-weight: 900; letter-spacing: -0.01em; }          /* titulares */
+.wide { font-stretch: 125%; text-transform: uppercase; letter-spacing: .32em; font-size: 10px; } /* antetítulos */
+h1.cond { font-size: 92px; line-height: .85; letter-spacing: -0.01em; color: var(--c-navy); }
+
+/* Texto desgastado como el logo SKIM */
+.scratched {
+  -webkit-mask-image: url("textura-rayada.svg"); mask-image: url("textura-rayada.svg");
+  -webkit-mask-size: 420px 220px; mask-size: 420px 220px;
+  -webkit-mask-repeat: repeat; mask-repeat: repeat;
+}
+
+.card { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: 20px; }
+.btn { display:inline-flex; align-items:center; gap:.5rem; border-radius:999px; padding:.55rem 1rem; font-weight:600; font-size:.9rem; transition: transform .12s, background-color .15s, color .15s; }
+.btn-primary { background: var(--c-accent); color:#fff; box-shadow: 0 6px 18px -8px rgb(255 106 51 / .8); }
+header.app-header { background: #1d2063; }
