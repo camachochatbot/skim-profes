@@ -201,3 +201,6 @@ export const longDate = (d: Date) =>
   lang.value === 'es'
     ? `${weekday(d)} ${d.getUTCDate()} de ${MONTHS.es[d.getUTCMonth()]}`
     : `${weekday(d)} ${d.getUTCDate()} ${MONTHS.en[d.getUTCMonth()]}`;
+
+/** Texto en línea bilingüe para las piezas: L('Hola', 'Hello'). */
+export const L = (es: string, en: string) => (lang.value === 'es' ? es : en);

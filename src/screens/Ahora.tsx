@@ -5,7 +5,7 @@ import { now, hhmm, dateOf, toMin } from '../core/clock';
 import { group } from '../core/group';
 import { currentMoment, todayMoments, type Moment } from '../core/schedule';
 import { PIECE_META, MOMENT_ICON } from '../core/pieces';
-import { facts } from '../core/journal';
+import { receivedCount } from '../pieces/Handover';
 import { go } from '../core/nav';
 import { t, tMoment, tPiece, longDate } from '../core/i18n';
 import { AppIcon } from '../components/Icons';
@@ -14,22 +14,13 @@ import { NavHeader } from '../components/NavHeader';
 const MEET = toMin(group.times.classAm[0]) - 15; // la escuela recoge 15 min antes de clase
 const GRAY = '#8e8e93';
 
-function receivedToday(day: number) {
-  const ids = new Set<string>();
-  for (const f of facts.value) {
-    const d = f.data as { day: number; monitor: string };
-    if (f.type === 'handover.received' && d.day === day) ids.add(d.monitor);
-  }
-  return ids.size;
-}
-
 function context(m: Moment) {
   const n = now.value;
   const w = group.weather[Math.max(0, Math.min(group.nights, n.day))];
   const vars = {
     hotel: group.hotel.name, rental: group.rental, school: group.school_ski, bus: group.bus,
     breakfast: group.times.breakfast, dinner: group.times.dinner, meet: hhmm(MEET),
-    n: group.monitors.length, r: receivedToday(n.day),
+    n: group.monitors.length, r: receivedCount(),
     a: group.students.filter((s) => s.allergies.length).length,
     rooms: new Set(group.students.map((s) => s.room)).size,
     wind: w?.wind ?? 0, tmin: w?.tMin ?? 0, tmax: w?.tMax ?? 0,
