@@ -1,7 +1,5 @@
 import { render } from 'preact';
-import '@fontsource-variable/archivo/wdth.css';
-import './estilo/estilo-skim.css'; // estilo del cuadro de mandos, tal cual
-import './styles/app.css'; // adaptación a móvil en la nieve
+import './styles/app.css';
 import './core/theme';
 import { loadJournal } from './core/journal';
 import { App } from './app';

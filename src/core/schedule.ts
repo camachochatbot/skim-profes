@@ -7,11 +7,11 @@ import type { StayTime } from './model';
 
 export type PieceId =
   | 'handover' | 'lostcard' | 'allergies' | 'incident' | 'planb'
-  | 'bank' | 'duty' | 'rounds' | 'postcard' | 'diary';
+  | 'bank' | 'rounds' | 'postcard' | 'diary';
 
 export const PIECES: PieceId[] = [
   'handover', 'lostcard', 'allergies', 'incident', 'planb',
-  'bank', 'duty', 'rounds', 'postcard', 'diary',
+  'bank', 'rounds', 'postcard', 'diary',
 ];
 
 export type MomentKind =
@@ -44,7 +44,7 @@ function skiDay(day: number, last: boolean): Moment[] {
       ];
   const pmEnd = last ? '16:00' : T.classPm[1];
   return [
-    d('night', '00:00', '07:00', 'duty'),
+    d('night', '00:00', '07:00'),
     d('breakfast', '07:00', '08:15', windy ? 'planb' : 'allergies', windy ? ['allergies'] : ['planb']),
     ...morning,
     d('lunch', T.classAm[1], windy ? '13:45' : T.classPm[0], 'allergies', [], true),
@@ -61,7 +61,7 @@ function skiDay(day: number, last: boolean): Moment[] {
           d('free', '17:45', T.dinner, 'bank', ['postcard']),
           d('dinner', T.dinner, '20:30', 'allergies'),
           d('evening', '20:30', '22:00', 'postcard', ['bank']),
-          d('rounds', '22:00', '24:00', 'rounds', ['duty']),
+          d('rounds', '22:00', '24:00', 'rounds', ['incident']),
         ]),
   ];
 }
@@ -70,12 +70,12 @@ function arrivalDay(): Moment[] {
   const d = (kind: MomentKind, from: string, to: string, piece?: PieceId, also?: PieceId[]): Moment =>
     ({ kind, day: 0, from: m(from), to: m(to), piece, also });
   return [
-    d('travel', '00:00', '16:00', 'lostcard', ['duty']),
+    d('travel', '00:00', '16:00', 'lostcard'),
     d('arrival', '16:00', '17:30', 'bank', ['lostcard']),
     d('fitting', '17:30', T.dinner, 'lostcard', ['bank']),
     d('dinner', T.dinner, '20:30', 'allergies'),
     d('evening', '20:30', '22:00', 'postcard', ['bank']),
-    d('rounds', '22:00', '24:00', 'rounds', ['duty']),
+    d('rounds', '22:00', '24:00', 'rounds', ['incident']),
   ];
 }
 

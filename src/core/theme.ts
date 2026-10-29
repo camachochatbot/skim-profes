@@ -11,5 +11,5 @@ effect(() => {
   const el = document.documentElement;
   el.dataset.theme = theme.value;
   el.lang = lang.value;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#1d2063');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme.value === 'dark' ? '#0a0c24' : '#f2f2f7');
 });

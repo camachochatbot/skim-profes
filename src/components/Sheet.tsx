@@ -1,14 +1,18 @@
+// Hoja de iOS: sube desde abajo, con asa y botón "Listo".
 import type { ComponentChildren } from 'preact';
 import { sheet } from '../core/nav';
-import { IconClose } from './Icons';
+import { t } from '../core/i18n';
 
 export function Sheet({ title, children }: { title: string; children: ComponentChildren }) {
+  const close = () => (sheet.value = null);
   return (
-    <div class="sheet-backdrop" onClick={(e) => e.target === e.currentTarget && (sheet.value = null)}>
+    <div class="sheet-backdrop" onClick={(e) => e.target === e.currentTarget && close()}>
       <section class="sheet" role="dialog" aria-label={title}>
+        <span class="grabber" />
         <header class="sheet-head">
-          <h2 class="cond">{title}</h2>
-          <button class="icon-btn" aria-label="Cerrar" onClick={() => (sheet.value = null)}><IconClose /></button>
+          <span />
+          <h2>{title}</h2>
+          <button class="link-btn" onClick={close}>{t('done')}</button>
         </header>
         <div class="sheet-body">{children}</div>
       </section>

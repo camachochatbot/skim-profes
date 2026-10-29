@@ -1,23 +1,24 @@
-// Pantalla "Ahora": sin menús. El momento en curso ocupa la pantalla como la
-// cima de un mapa topográfico; lo que ya pasó y lo que viene son curvas de nivel.
+// Pantalla "Ahora": una tarjeta tipo Actividad en Vivo con lo que toca y,
+// debajo, el día entero como lista agrupada de iOS.
+import { ChevronRight, Check } from 'lucide-preact';
 import { now, hhmm, dateOf, toMin } from '../core/clock';
-import { group, teacherById } from '../core/group';
+import { group } from '../core/group';
 import { currentMoment, todayMoments, type Moment } from '../core/schedule';
-import { onDuty } from '../core/duty';
+import { PIECE_META, MOMENT_ICON } from '../core/pieces';
 import { facts } from '../core/journal';
 import { go } from '../core/nav';
-import { lang } from '../core/settings';
-import { t, tMoment, tPiece, weekday } from '../core/i18n';
-import { ContourLine, Summit } from '../components/Contour';
-import { IconArrow } from '../components/Icons';
-import { FitTitle } from '../components/FitTitle';
+import { t, tMoment, tPiece, longDate } from '../core/i18n';
+import { AppIcon } from '../components/Icons';
+import { NavHeader } from '../components/NavHeader';
 
 const MEET = toMin(group.times.classAm[0]) - 15; // la escuela recoge 15 min antes de clase
+const GRAY = '#8e8e93';
 
 function receivedToday(day: number) {
   const ids = new Set<string>();
   for (const f of facts.value) {
-    if (f.type === 'handover.received' && (f.data as { day: number }).day === day) ids.add((f.data as { monitor: string }).monitor);
+    const d = f.data as { day: number; monitor: string };
+    if (f.type === 'handover.received' && d.day === day) ids.add(d.monitor);
   }
   return ids.size;
 }
@@ -25,103 +26,107 @@ function receivedToday(day: number) {
 function context(m: Moment) {
   const n = now.value;
   const w = group.weather[Math.max(0, Math.min(group.nights, n.day))];
-  const duty = onDuty(n.day, n.min).map((id) => teacherById.get(id)?.short).join(' + ');
-  const a = group.students.filter((s) => s.allergies.length).length;
   const vars = {
-    hotel: group.hotel.name,
-    rental: group.rental,
-    school: group.school_ski,
-    bus: group.bus,
-    breakfast: group.times.breakfast,
-    dinner: group.times.dinner,
-    meet: hhmm(MEET),
-    n: group.monitors.length,
-    r: receivedToday(n.day),
-    to: hhmm(m.to),
-    a,
-    duty,
-    wind: w?.wind ?? 0,
-    tmin: w?.tMin ?? 0,
-    tmax: w?.tMax ?? 0,
-    sky: t(`sky.${w?.sky ?? 'sun'}`).toLowerCase(),
-    days: Math.max(0, -n.day),
+    hotel: group.hotel.name, rental: group.rental, school: group.school_ski, bus: group.bus,
+    breakfast: group.times.breakfast, dinner: group.times.dinner, meet: hhmm(MEET),
+    n: group.monitors.length, r: receivedToday(n.day),
+    a: group.students.filter((s) => s.allergies.length).length,
+    rooms: new Set(group.students.map((s) => s.room)).size,
+    wind: w?.wind ?? 0, tmin: w?.tMin ?? 0, tmax: w?.tMax ?? 0,
+    sky: t(`sky.${w?.sky ?? 'sun'}`), days: Math.max(0, -n.day),
   };
   const chips: string[] = [];
   if (m.kind === 'class' || m.kind === 'handover' || m.kind === 'pickup') chips.push(t('chip.received', vars));
   if (m.kind === 'lunch' || m.kind === 'dinner' || m.kind === 'breakfast') chips.push(t('chip.allergies', vars));
-  if (m.kind === 'night') chips.push(t('chip.duty', vars));
+  if (m.kind === 'rounds') chips.push(t('chip.rooms', vars));
   if (m.kind === 'planb' || (m.kind === 'breakfast' && vars.wind >= 70)) chips.push(t('chip.wind', vars));
   return { text: t(`ctx.${m.kind}`, vars), chips };
 }
 
-function countdown(m: Moment) {
+/** Cuenta atrás al estilo de un temporizador de Actividad en Vivo. */
+function countdown(m: Moment): { label: string; value: string; unit?: string } {
   const n = now.value;
-  if (m.kind === 'handover' && n.min < MEET) return t('now.in', { m: MEET - n.min });
-  return m.to >= 1440 ? '' : t('now.until', { t: hhmm(m.to) });
+  if (m.kind === 'handover' && n.min < MEET) return { label: t('now.starts'), value: String(MEET - n.min), unit: t('now.min') };
+  const left = m.to - n.min;
+  if (m.to < 1440 && left <= 90) return { label: t('now.ends'), value: String(left), unit: t('now.min') };
+  return { label: t('now.until', { t: '' }).trim(), value: m.to >= 1440 ? '24:00' : hhmm(m.to) };
+}
+
+function iconFor(m: Moment) {
+  return { icon: MOMENT_ICON[m.kind], color: m.piece ? PIECE_META[m.piece].color : GRAY };
 }
 
 export function Ahora() {
   const n = now.value;
   const m = currentMoment.value;
   const list = todayMoments.value;
-  const i = list.findIndex((x) => x.from === m.from);
-  const past = list.slice(Math.max(0, i - 1), i);
-  const next = list.slice(i + 1, i + 4);
   const ctx = context(m);
+  const cd = countdown(m);
   const date = dateOf(n.day);
   const dayLabel =
     n.day < 0 ? t('day.pre') : n.day > group.nights ? t('day.post') : n.day === 0 ? t('day.0') : t('day.n', { n: n.day });
-  const title = tMoment(m.kind);
-  void lang.value;
+  const progress = Math.min(1, Math.max(0, (n.min - m.from) / (m.to - m.from)));
+  const ic = iconFor(m);
 
   return (
-    <main class="ahora">
-      <p class="wide ahora-day">{weekday(date)} {date.getUTCDate()} · {dayLabel}</p>
+    <main class="screen">
+      <NavHeader title={t('tab.now')} sub={`${longDate(date)} · ${dayLabel}`} />
 
-      <div class="contours past">
-        {past.map((p) => (
-          <button class="contour-row" onClick={() => p.piece && go(p.piece)}>
-            <ContourLine seed={p.from + p.day * 1440} time={hhmm(p.from)} title={tMoment(p.kind)} extra="✓" faded />
-          </button>
-        ))}
-      </div>
-
-      <section class="now-card card">
-        <Summit seed={m.from + m.day} />
-        <p class="wide now-kicker">
-          <span class="now-dot" /> {t('now.label')} · {hhmm(m.from)}–{m.to >= 1440 ? '24:00' : hhmm(m.to)}
-        </p>
-        <FitTitle class="cond scratched now-title" text={title} />
-        {countdown(m) && <p class="now-countdown cond">{countdown(m)}</p>}
-        <p class="now-text">{ctx.text}</p>
-        {ctx.chips.length > 0 && (
-          <div class="chips">{ctx.chips.map((c) => <span class="chip">{c}</span>)}</div>
-        )}
+      <section class="live" aria-live="polite">
+        <div class="live-top">
+          <AppIcon icon={ic.icon} color={ic.color} size={44} />
+          <div class="live-head">
+            <span class="live-kicker">{hhmm(m.from)}–{m.to >= 1440 ? '24:00' : hhmm(m.to)}</span>
+            <h2 class="live-title">{tMoment(m.kind)}</h2>
+          </div>
+          <div class="live-timer">
+            <span class="live-timer-label">{cd.label}</span>
+            <span class="live-timer-value tnum">{cd.value}{cd.unit && <small> {cd.unit}</small>}</span>
+          </div>
+        </div>
+        <div class="live-progress"><span style={{ width: `${progress * 100}%` }} /></div>
+        <p class="live-text">{ctx.text}</p>
+        {ctx.chips.length > 0 && <div class="capsules">{ctx.chips.map((c) => <span class="capsule">{c}</span>)}</div>}
         {m.piece && (
-          <button class="btn btn-primary btn-huge" onClick={() => go(m.piece!)}>
-            <span>{tPiece(m.piece)}</span>
-            <IconArrow />
-          </button>
+          <button class="btn-filled" onClick={() => go(m.piece!)}>{tPiece(m.piece)}</button>
         )}
         {m.also && m.also.length > 0 && (
-          <div class="also">
-            {m.also.map((p) => (
-              <button class="btn btn-big btn-ghost" onClick={() => go(p)}>{tPiece(p)}</button>
-            ))}
+          <div class="live-also">
+            {m.also.map((p) => {
+              const meta = PIECE_META[p];
+              const I = meta.icon;
+              return (
+                <button class="btn-tinted" onClick={() => go(p)}>
+                  <I size={22} strokeWidth={2.2} color={meta.color} /> <span>{tPiece(p)}</span>
+                </button>
+              );
+            })}
           </div>
         )}
       </section>
 
-      {next.length > 0 && (
-        <div class="contours next">
-          <p class="wide contours-label">{t('now.next')}</p>
-          {next.map((p) => (
-            <button class="contour-row" onClick={() => p.piece && go(p.piece)}>
-              <ContourLine seed={p.from + p.day * 1440} time={hhmm(p.from)} title={tMoment(p.kind)} extra={p.piece ? tPiece(p.piece) : undefined} />
-            </button>
-          ))}
-        </div>
-      )}
+      <h3 class="section-head">{t('now.today')}</h3>
+      <ul class="group-list">
+        {list.map((x) => {
+          const isNow = x.from === m.from;
+          const past = x.to <= n.min && !isNow;
+          const xi = iconFor(x);
+          return (
+            <li>
+              <button class={`row ${past ? 'is-past' : ''} ${isNow ? 'is-now' : ''}`} onClick={() => x.piece && go(x.piece)} disabled={!x.piece}>
+                <AppIcon icon={xi.icon} color={past ? GRAY : xi.color} />
+                <span class="row-main">
+                  <span class="row-title">{tMoment(x.kind)}</span>
+                  {x.piece && <span class="row-sub">{tPiece(x.piece)}</span>}
+                </span>
+                {isNow ? <span class="badge-now">{t('now.badge')}</span> : past ? <Check size={20} class="row-check" /> : null}
+                <span class="row-time tnum">{hhmm(x.from)}</span>
+                {x.piece && <ChevronRight size={20} class="chev" />}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
     </main>
   );
 }
