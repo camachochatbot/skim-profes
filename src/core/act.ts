@@ -21,5 +21,5 @@ export function list<T>(type: string, pred?: (f: Logged<T>) => boolean): Logged<
 }
 
 export function fmtMoney(n: number) {
-  return `${n.toFixed(n % 1 ? 2 : 0).replace('.', ',')} €`;
+  return `${n.toFixed(n % 1 ? 2 : 0).replace('.', ',')}\u00a0€`;
 }

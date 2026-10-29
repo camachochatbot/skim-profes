@@ -8,8 +8,12 @@ import { Ahora } from './screens/Ahora';
 import { TabList } from './screens/TabList';
 import { PieceShell } from './screens/PieceShell';
 import { PIECE_VIEW } from './pieces';
+import { LostAlertOverlay } from './components/LostAlertOverlay';
+import { FoundPage } from './screens/FoundPage';
 
 export function App() {
+  const found = location.hash.match(/perdido=(\w+)/);
+  if (found) return <FoundPage token={found[1]} />;
   const p = openPiece.value;
   const x = tab.value;
   return (
@@ -19,6 +23,7 @@ export function App() {
       <TabBar />
       {sheet.value === 'sim' && <SimSheet />}
       {sheet.value === 'settings' && <SettingsSheet />}
+      <LostAlertOverlay />
     </>
   );
 }

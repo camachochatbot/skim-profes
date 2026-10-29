@@ -26,7 +26,8 @@
     "@preact/signals": "^2.11.4",
     "idb": "^8.0.4",
     "lucide-preact": "^1.64.0",
-    "preact": "^11.1.0"
+    "preact": "^11.1.0",
+    "qrcode-generator": "^2.0.4"
   },
   "private": true,
   "type": "module"
