@@ -6,6 +6,10 @@ import { Allergies } from './Allergies';
 import { Incidents } from './Incidents';
 import { PlanB } from './PlanB';
 import { LostCard } from './LostCard';
+import { Bank } from './Bank';
+import { Rounds } from './Rounds';
+import { Postcard } from './Postcard';
+import { Diary } from './Diary';
 
 export const PIECE_VIEW: Partial<Record<PieceId, ComponentType>> = {
   handover: Handover,
@@ -13,4 +17,8 @@ export const PIECE_VIEW: Partial<Record<PieceId, ComponentType>> = {
   incident: Incidents,
   planb: PlanB,
   lostcard: LostCard,
+  bank: Bank,
+  rounds: Rounds,
+  postcard: Postcard,
+  diary: Diary,
 };
